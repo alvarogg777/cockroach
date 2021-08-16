@@ -1,0 +1,4 @@
+resources:
+- cluster-init.yaml
+- cockroachdb-statefulset.yaml 
+namespace: storage
