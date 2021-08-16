@@ -77,7 +77,7 @@ jobs:
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --platform linux/amd64,linux/arm64 \
             --output "type=image,push=true" \
-            --build-arg MLFLOW_VERSION=${{ matrix.cockroach-version }} \
+            --build-arg COCKROACH_VERSION=${{ matrix.cockroach-version }} \
             --tag alvarogg777/cockroach:${{ matrix.cockroach-version }} \
             --file ./Dockerfile \
             .
