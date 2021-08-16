@@ -1,6 +1,7 @@
 FROM ubuntu:focal-20210723 as build
 ARG COCKROACH_VERSION
 ENV DEBIAN_FRONTEND=noninteractive COCKROACH_VERSION=$COCKROACH_VERSION
+RUN add-apt-repository -y ppa:longsleep/golang-backports
 RUN apt-get update
 RUN apt-get -y upgrade
 RUN apt-get -y install gcc golang cmake autoconf wget bison libncurses-dev
