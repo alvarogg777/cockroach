@@ -1,6 +1,7 @@
 FROM ubuntu:focal-20210723 as build
+ARG COCKROACH_VERSION
+ENV DEBIAN_FRONTEND=noninteractive COCKROACH_VERSION=$COCKROACH_VERSION
 RUN apt-get update
-ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y upgrade
 RUN apt-get -y install gcc golang cmake autoconf wget bison libncurses-dev
 RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v${COCKROACH_VERSION}.src.tgz | tar  xvz
