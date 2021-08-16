@@ -1,0 +1,86 @@
+name: build multi-arch images
+
+on:
+  push:
+    branches: [ mult_arch_build ]
+  pull_request: 
+    branches: [ master ]
+  schedule: 
+  - cron:  '0 8 1/7 * *'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  multi:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cockroach-version: [ 21.1.7 ]
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2.3.4
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1.2.0
+        
+      -
+        name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.cockroach-version }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - 
+        name: Docker Buildx (clean build)
+        if: steps.cache-primes.outputs.cache-hit != 'true'
+        run: |
+          docker buildx create --use;
+      - 
+        name: Docker Buildx (clean build)
+        if: steps.cache-primes.outputs.cache-hit != 'true'
+        run: |
+          docker buildx build \
+            --cache-to "type=local,dest=/tmp/.buildx-cache" \
+            --platform linux/amd64,linux/arm64 \
+            --output "type=image,push=false" \
+            --build-arg COCKROACH_VERSION=${{ matrix.cockroach-version }} \
+            --tag alvarogg777/cockroach:${{ matrix.cockroach-version }} \
+            --file ./Dockerfile \
+            .
+      - name: Docker Buildx (cache build)
+        if: steps.cache-primes.outputs.cache-hit
+        run: |
+          docker buildx build \
+            --cache-from "type=local,src=/tmp/.buildx-cache" \
+            --cache-to "type=local,dest=/tmp/.buildx-cache" \
+            --platform linux/amd64,linux/arm64 \
+            --output "type=image,push=false" \
+            --build-arg COCKROACH_VERSION=${{ matrix.cockroach-version }} \
+            --tag alvarogg777/cockroach:${{ matrix.cockroach-version }} \
+            --file ./Dockerfile \
+            .
+      - 
+        name: Login to GitHub Docker Registry
+        env:
+          DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}        
+        run: |
+          echo "${DOCKERHUB_PASS}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
+      -  
+        name: Docker Buildx (push)
+        run: |
+          docker buildx build \
+            --cache-from "type=local,src=/tmp/.buildx-cache" \
+            --platform linux/amd64,linux/arm64 \
+            --output "type=image,push=true" \
+            --build-arg MLFLOW_VERSION=${{ matrix.cockroach-version }} \
+            --tag alvarogg777/cockroach:${{ matrix.cockroach-version }} \
+            --file ./Dockerfile \
+            .
+      - 
+        name: Print image url
+        run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
