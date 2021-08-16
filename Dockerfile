@@ -1,4 +1,4 @@
-FROM ubuntu:latest as build
+FROM ubuntu:focal-20210723 as build
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y upgrade
@@ -8,7 +8,7 @@ WORKDIR cockroach-v21.1.7
 RUN make build
 RUN make install
 
-FROM ubuntu:latest
+FROM ubuntu:focal-20210723
 RUN apt-get update && apt-get -y upgrade && apt-get install -y libc6 ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
 WORKDIR /cockroach/
 ENV PATH=/cockroach:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
