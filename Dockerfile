@@ -7,7 +7,7 @@ RUN apt-get -y upgrade
 RUN apt-get -y install gcc golang-go cmake autoconf wget bison libncurses-dev
 RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v${COCKROACH_VERSION}.src.tgz | tar  xvz
 WORKDIR cockroach-v${COCKROACH_VERSION}
-RUN make `nproc --all` build; make `nproc --all` install
+RUN make -j `nproc --all` build; make -j `nproc --all` install
 
 FROM ubuntu:focal-20210723
 RUN apt-get update && apt-get -y upgrade && apt-get install -y libc6 ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
