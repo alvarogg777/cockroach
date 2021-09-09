@@ -1,20 +1,23 @@
-FROM ubuntu:focal-20210723 as build
+FROM ubuntu:focal-20210827 as build
 ARG COCKROACH_VERSION
+ARG TARGETPLATFORM
 ENV DEBIAN_FRONTEND=noninteractive COCKROACH_VERSION=$COCKROACH_VERSION
 RUN apt-get update; apt-get install -qqy software-properties-common
-RUN add-apt-repository -y ppa:longsleep/golang-backports
+RUN add-apt-repository -y ppa:longsleep/golang-backports;
 RUN apt-get -qqy upgrade
-RUN apt-get -qqy install gcc golang-go cmake autoconf wget bison libncurses-dev
+RUN apt-get -qqy install gcc golang-go cmake autoconf wget bison libncurses-dev git ccache
 RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v${COCKROACH_VERSION}.src.tgz | tar  xz
+RUN wget https://github.com/bazelbuild/bazel/releases/download/4.2.1/bazel-4.2.1-linux-$TARGETPLATFORM -O /usr/local/bin/bazel
 WORKDIR cockroach-v${COCKROACH_VERSION}
 RUN make -j `nproc --all` build; make -j `nproc --all` install
 
-FROM ubuntu:focal-20210723
+FROM ubuntu:focal-20210827
 RUN apt-get update && apt-get -qqy upgrade && apt-get install -qqy libc6 ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
 WORKDIR /cockroach/
 ENV PATH=/cockroach:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV COCKROACH_CHANNEL=kubernetes-insecure
 RUN mkdir -p /cockroach/
 COPY --from=build /usr/local/bin/cockroach /cockroach/cockroach
+COPY ./cockroach.sh /cockroach/cockroach.sh
 EXPOSE 26257 8080
-ENTRYPOINT ["/cockroach/cockroach"]
+ENTRYPOINT ["/cockroach/cockroach.sh"]
