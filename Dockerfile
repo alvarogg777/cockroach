@@ -2,13 +2,13 @@ FROM --platform=$BUILDPLATFORM ubuntu:focal-20210827 as build
 ARG COCKROACH_VERSION
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
-ENV DEBIAN_FRONTEND=noninteractive COCKROACH_VERSION=$COCKROACH_VERSION
+ENV DEBIAN_FRONTEND=noninteractive COCKROACH_VERSION=$COCKROACH_VERSION TARGETPLATFORM=$TARGETPLATFORM
+RUN wget https://github.com/bazelbuild/bazel/releases/download/4.2.1/bazel-4.2.1-linux-${TARGETPLATFORM} -O /usr/local/bin/bazel
 RUN apt-get update; apt-get install -qqy software-properties-common
 RUN add-apt-repository -y ppa:longsleep/golang-backports;
 RUN apt-get -qqy upgrade
 RUN apt-get -qqy install gcc golang-go cmake autoconf wget bison libncurses-dev git ccache
 RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v${COCKROACH_VERSION}.src.tgz | tar  xz
-RUN wget https://github.com/bazelbuild/bazel/releases/download/4.2.1/bazel-4.2.1-linux-$TARGETPLATFORM -O /usr/local/bin/bazel
 WORKDIR cockroach-v${COCKROACH_VERSION}
 RUN make -j `nproc --all` build; make -j `nproc --all` install
 
