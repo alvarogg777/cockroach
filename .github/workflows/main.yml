@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cockroach-version: [ 21.1.7 ]
+        cockroach-version: [ 21.1.8 ]
     steps:
       -
         name: Checkout
