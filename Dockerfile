@@ -1,5 +1,6 @@
-FROM ubuntu:focal-20210827 as build
+FROM --platform=$BUILDPLATFORM ubuntu:focal-20210827 as build
 ARG COCKROACH_VERSION
+ARG BUILDPLATFORM
 ARG TARGETPLATFORM
 ENV DEBIAN_FRONTEND=noninteractive COCKROACH_VERSION=$COCKROACH_VERSION
 RUN apt-get update; apt-get install -qqy software-properties-common
