@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM ubuntu:focal-20210827 as build
+FROM --platform=$BUILDPLATFORM ubuntu:focal-20220316 as build
 ARG COCKROACH_VERSION
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
@@ -12,7 +12,7 @@ RUN wget -qO- https://binaries.cockroachdb.com/cockroach-v${COCKROACH_VERSION}.s
 WORKDIR cockroach-v${COCKROACH_VERSION}
 RUN make -j `nproc --all` build; make -j `nproc --all` install
 
-FROM ubuntu:focal-20210827
+FROM ubuntu:focal-20220316
 RUN apt-get update && apt-get -qqy upgrade && apt-get install -qqy libc6 ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
 WORKDIR /cockroach/
 ENV PATH=/cockroach:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
